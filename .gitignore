@@ -1,0 +1,7 @@
+test_1
+a.out
+*.a
+*.dylib
+*.env
+.DS_Store
+*.dSYM
