@@ -607,6 +607,127 @@ jesen_err_t jesen_array_remove(jesen_node_t *array, uint32_t index) {
   return JESEN_ERR_NONE;
 }
 
+jesen_err_t jesen_array_get_int32(jesen_node_t *array, uint32_t index,
+                                  int32_t *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_array_get_value(array, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_int32(node, out);
+}
+
+jesen_err_t jesen_array_get_double(jesen_node_t *array, uint32_t index,
+                                   double *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_array_get_value(array, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_double(node, out);
+}
+
+jesen_err_t jesen_array_get_bool(jesen_node_t *array, uint32_t index,
+                                 bool *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_array_get_value(array, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_bool(node, out);
+}
+
+jesen_err_t jesen_array_get_string(jesen_node_t *array, uint32_t index,
+                                   char *out, size_t out_max, size_t *out_len) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_array_get_value(array, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_string(node, out, out_max, out_len);
+}
+
+jesen_err_t jesen_array_get_object_value(jesen_node_t *array, uint32_t index,
+                                         const char *key, jesen_node_t **out) {
+  if (!array || !key || !out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *elem = NULL;
+  jesen_err_t err = jesen_array_get_value(array, index, &elem);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  if (!cJSON_IsObject(elem->cjson)) {
+    return JESEN_ERR_WRONG_TYPE;
+  }
+  return jesen_node_find(elem, key, out);
+}
+
+jesen_err_t jesen_array_get_object_int32(jesen_node_t *array, uint32_t index,
+                                         const char *key, int32_t *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_array_get_object_value(array, index, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_int32(child, out);
+}
+
+jesen_err_t jesen_array_get_object_double(jesen_node_t *array, uint32_t index,
+                                          const char *key, double *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_array_get_object_value(array, index, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_double(child, out);
+}
+
+jesen_err_t jesen_array_get_object_bool(jesen_node_t *array, uint32_t index,
+                                        const char *key, bool *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_array_get_object_value(array, index, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_bool(child, out);
+}
+
+jesen_err_t jesen_array_get_object_string(jesen_node_t *array, uint32_t index,
+                                          const char *key, char *out,
+                                          size_t out_max, size_t *out_len) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_array_get_object_value(array, index, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_string(child, out, out_max, out_len);
+}
+
 jesen_err_t jesen_node_find(const jesen_node_t *node, const char *key,
                             jesen_node_t **out) {
   if (!node || !key || !out) {
@@ -626,6 +747,133 @@ jesen_err_t jesen_node_find(const jesen_node_t *node, const char *key,
   }
 
   return JESEN_ERR_NOT_FOUND;
+}
+
+jesen_err_t jesen_object_get_int32(const jesen_node_t *object, const char *key,
+                                   int32_t *out) {
+  if (!object || !key || !out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_node_find(object, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_int32(child, out);
+}
+
+jesen_err_t jesen_object_get_double(const jesen_node_t *object, const char *key,
+                                    double *out) {
+  if (!object || !key || !out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_node_find(object, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_double(child, out);
+}
+
+jesen_err_t jesen_object_get_bool(const jesen_node_t *object, const char *key,
+                                  bool *out) {
+  if (!object || !key || !out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_node_find(object, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_bool(child, out);
+}
+
+jesen_err_t jesen_object_get_string(const jesen_node_t *object, const char *key,
+                                    char *out, size_t out_max,
+                                    size_t *out_len) {
+  if (!object || !key || !out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_node_find(object, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_string(child, out, out_max, out_len);
+}
+
+jesen_err_t jesen_object_get_array_value(const jesen_node_t *object,
+                                         const char *key, uint32_t index,
+                                         jesen_node_t **out) {
+  if (!object || !key || !out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *child = NULL;
+  jesen_err_t err = jesen_node_find(object, key, &child);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  if (!cJSON_IsArray(child->cjson)) {
+    return JESEN_ERR_WRONG_TYPE;
+  }
+  return jesen_array_get_value(child, index, out);
+}
+
+jesen_err_t jesen_object_get_array_int32(const jesen_node_t *object,
+                                         const char *key, uint32_t index,
+                                         int32_t *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_object_get_array_value(object, key, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_int32(node, out);
+}
+
+jesen_err_t jesen_object_get_array_double(const jesen_node_t *object,
+                                          const char *key, uint32_t index,
+                                          double *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_object_get_array_value(object, key, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_double(node, out);
+}
+
+jesen_err_t jesen_object_get_array_bool(const jesen_node_t *object,
+                                        const char *key, uint32_t index,
+                                        bool *out) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_object_get_array_value(object, key, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_bool(node, out);
+}
+
+jesen_err_t jesen_object_get_array_string(const jesen_node_t *object,
+                                          const char *key, uint32_t index,
+                                          char *out, size_t out_max,
+                                          size_t *out_len) {
+  if (!out) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+  jesen_node_t *node = NULL;
+  jesen_err_t err = jesen_object_get_array_value(object, key, index, &node);
+  if (err != JESEN_ERR_NONE) {
+    return err;
+  }
+  return jesen_value_get_string(node, out, out_max, out_len);
 }
 
 jesen_err_t jesen_value_get_string(const jesen_node_t *node, char *out,

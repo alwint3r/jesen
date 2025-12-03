@@ -71,5 +71,31 @@ int main() {
     return -1;
   }
 
+  jesen_node_t *params2_out = nullptr;
+  err = jesen_object_get_value(parsed, "params2", &params2_out);
+  if (err != JESEN_ERR_NONE) {
+    std::printf("Failed finding: %d\n", (int)err);
+    return -1;
+  }
+
+  jesen_node_t *params_item = nullptr;
+  err = jesen_array_get_value(params2_out, 0, &params_item);
+  if (err != JESEN_ERR_NONE) {
+    std::printf("Failed getting array value: %d\n", (int)err);
+    return -1;
+  }
+
+  int32_t param_value = 0;
+  err = jesen_value_get_int32(params_item, &param_value);
+
+  if (err != JESEN_ERR_NONE) {
+    std::printf("Failed getting int32 value: %d\n", (int)err);
+    return -1;
+  }
+
+  std::printf("param_value = %d\n", (int)param_value);
+
+  jesen_destroy(parsed);
+
   return 0;
 }

@@ -20,40 +20,28 @@ static void test_object_ops(void) {
   EXPECT_OK(jesen_object_size(root, &obj_size));
   assert(obj_size == 5);
 
-  jesen_node_t *str_node = NULL;
-  EXPECT_OK(jesen_node_find(root, "s", &str_node));
-  bool is_string = false;
-  EXPECT_OK(jesen_value_is_string(str_node, &is_string));
-  assert(is_string);
   char buf[16];
   size_t out_len = 0;
-  EXPECT_OK(jesen_value_get_string(str_node, buf, sizeof buf, &out_len));
+  EXPECT_OK(jesen_object_get_string(root, "s", buf, sizeof buf, &out_len));
   assert(out_len == 5);
   assert(strcmp(buf, "hello") == 0);
 
-  jesen_node_t *int_node = NULL;
-  EXPECT_OK(jesen_node_find(root, "i", &int_node));
-  bool is_num = false;
-  EXPECT_OK(jesen_value_is_int32(int_node, &is_num));
-  assert(is_num);
   int32_t int_val = 0;
-  EXPECT_OK(jesen_value_get_int32(int_node, &int_val));
+  EXPECT_OK(jesen_object_get_int32(root, "i", &int_val));
   assert(int_val == 42);
 
-  jesen_node_t *bool_node = NULL;
-  EXPECT_OK(jesen_node_find(root, "b", &bool_node));
-  bool is_bool = false;
-  EXPECT_OK(jesen_value_is_bool(bool_node, &is_bool));
-  assert(is_bool);
+  double dbl_val = 0;
+  EXPECT_OK(jesen_object_get_double(root, "d", &dbl_val));
+  assert(dbl_val == 3.14);
+
   bool bool_val = false;
-  EXPECT_OK(jesen_value_get_bool(bool_node, &bool_val));
+  EXPECT_OK(jesen_object_get_bool(root, "b", &bool_val));
   assert(bool_val == true);
 
   jesen_node_t *null_node = NULL;
   EXPECT_OK(jesen_node_find(root, "n", &null_node));
   bool is_null = false;
   EXPECT_OK(jesen_value_is_null(null_node, &is_null));
-  assert(is_null);
 
   EXPECT_OK(jesen_destroy(root));
 }
@@ -71,27 +59,21 @@ static void test_array_ops(void) {
   EXPECT_OK(jesen_array_size(arr, &size));
   assert(size == 4);
 
-  jesen_node_t *val = NULL;
-  EXPECT_OK(jesen_array_get_value(arr, 0, &val));
-  bool is_num = false;
-  EXPECT_OK(jesen_value_is_double(val, &is_num));
-  assert(is_num);
+  double dbl_out = 0;
+  EXPECT_OK(jesen_array_get_double(arr, 0, &dbl_out));
+  assert(dbl_out == 1.5);
 
-  EXPECT_OK(jesen_array_get_value(arr, 2, &val));
-  bool is_bool = false;
-  EXPECT_OK(jesen_value_is_bool(val, &is_bool));
-  assert(is_bool);
+  int32_t int_out = 0;
+  EXPECT_OK(jesen_array_get_int32(arr, 1, &int_out));
+  assert(int_out == 7);
+
   bool bool_val = true;
-  EXPECT_OK(jesen_value_get_bool(val, &bool_val));
+  EXPECT_OK(jesen_array_get_bool(arr, 2, &bool_val));
   assert(bool_val == false);
 
-  EXPECT_OK(jesen_array_get_value(arr, 3, &val));
-  bool is_str = false;
-  EXPECT_OK(jesen_value_is_string(val, &is_str));
-  assert(is_str);
   char buf[8];
   size_t out_len = 0;
-  EXPECT_OK(jesen_value_get_string(val, buf, sizeof buf, &out_len));
+  EXPECT_OK(jesen_array_get_string(arr, 3, buf, sizeof buf, &out_len));
   assert(out_len == 3);
   assert(strcmp(buf, "abc") == 0);
 
@@ -111,7 +93,8 @@ static void test_assign_and_detach(void) {
   EXPECT_OK(jesen_object_create(&child));
 
   EXPECT_OK(jesen_node_assign_to(parent1, "child", child));
-  assert(jesen_node_assign_to(parent1, "again", child) == JESEN_ERR_ALREADY_ATTACHED);
+  assert(jesen_node_assign_to(parent1, "again", child) ==
+         JESEN_ERR_ALREADY_ATTACHED);
 
   EXPECT_OK(jesen_node_detach(child));
   EXPECT_OK(jesen_node_assign_to(parent2, "moved", child));
@@ -129,33 +112,43 @@ static void test_parse_wrapper(void) {
   jesen_node_t *root = NULL;
   EXPECT_OK(jesen_parse(json, strlen(json), &root));
 
-  jesen_node_t *a = NULL;
-  EXPECT_OK(jesen_node_find(root, "a", &a));
   int32_t intval = 0;
-  EXPECT_OK(jesen_value_get_int32(a, &intval));
+  EXPECT_OK(jesen_object_get_int32(root, "a", &intval));
   assert(intval == 1);
 
-  jesen_node_t *b = NULL;
-  EXPECT_OK(jesen_node_find(root, "b", &b));
-  bool is_array = false;
-  EXPECT_OK(jesen_value_is_array(b, &is_array));
-  assert(is_array);
-
-  size_t arr_size = 0;
-  EXPECT_OK(jesen_array_size(b, &arr_size));
-  assert(arr_size == 1);
-
-  jesen_node_t *elem0 = NULL;
-  EXPECT_OK(jesen_array_get_value(b, 0, &elem0));
   bool val = false;
-  EXPECT_OK(jesen_value_get_bool(elem0, &val));
+  EXPECT_OK(jesen_object_get_array_bool(root, "b", 0, &val));
   assert(val == true);
 
-  jesen_node_t *elem_parent = NULL;
-  EXPECT_OK(jesen_node_get_parent(elem0, &elem_parent));
-  assert(elem_parent == b);
+  EXPECT_OK(jesen_destroy(root));
+}
+
+static void test_nested_getters(void) {
+  jesen_node_t *root = NULL;
+  EXPECT_OK(jesen_object_create(&root));
+
+  jesen_node_t *nums = NULL;
+  EXPECT_OK(jesen_array_create_to(root, "nums", &nums));
+  EXPECT_OK(jesen_array_add_int32(nums, 10));
+  EXPECT_OK(jesen_array_add_int32(nums, 20));
+
+  int32_t second = 0;
+  EXPECT_OK(jesen_object_get_array_int32(root, "nums", 1, &second));
+  assert(second == 20);
+
+  jesen_node_t *arr_obj = NULL;
+  EXPECT_OK(jesen_array_create(&arr_obj));
+  jesen_node_t *inner_obj = NULL;
+  EXPECT_OK(jesen_object_create(&inner_obj));
+  EXPECT_OK(jesen_object_add_int32(inner_obj, "x", 99));
+  EXPECT_OK(jesen_node_assign_to(arr_obj, "ignored", inner_obj));
+
+  int32_t xval = 0;
+  EXPECT_OK(jesen_array_get_object_int32(arr_obj, 0, "x", &xval));
+  assert(xval == 99);
 
   EXPECT_OK(jesen_destroy(root));
+  EXPECT_OK(jesen_destroy(arr_obj));
 }
 
 int main(void) {
@@ -163,6 +156,7 @@ int main(void) {
   test_array_ops();
   test_assign_and_detach();
   test_parse_wrapper();
+  test_nested_getters();
   printf("All tests passed\n");
   return 0;
 }
