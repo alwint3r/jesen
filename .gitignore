@@ -1,6 +1,7 @@
 test_1
 a.out
 *.a
+*.o
 *.dylib
 *.env
 .DS_Store
