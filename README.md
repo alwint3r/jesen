@@ -15,6 +15,28 @@ Right now, jesen only wraps [cJSON](https://github.com/DaveGamble/cJSON).
 ## Building & Testing
 The project uses only the C standard library and cJSON (vendored in `cJSON/`). You can build this library with c99 standard at minimum.
 
+### Using CMake
+```sh
+mkdir build && cd build
+cmake ..
+make
+```
+
+To build with tests:
+```sh
+cmake -DJESEN_BUILD_TESTS=ON ..
+make
+ctest
+```
+
+To install (installs `libjesen.a` and `jesen.h`):
+```sh
+cmake --install . --prefix /usr/local
+```
+
+> **Note:** The CMake build statically links cJSON into `libjesen.a`. The cJSON headers are not installed separately—jesen's public API (`jesen.h`) is self-contained and does not expose cJSON types.
+
+### Manual Build
 Build and run the simple test suite:
 ```sh
 clang -std=c11 -I. tests/test_jesen.c jesen_cjson.c cJSON/cJSON.c -o /tmp/test_jesen

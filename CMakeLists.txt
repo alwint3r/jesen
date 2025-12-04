@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 3.10)
+project(jesen VERSION 1.0.0 LANGUAGES C)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Library sources
+set(JESEN_SOURCES
+    jesen_cjson.c
+    cJSON/cJSON.c
+)
+
+# Create static library
+add_library(jesen STATIC ${JESEN_SOURCES})
+
+target_include_directories(jesen
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+)
+
+# Optional: Build tests
+option(JESEN_BUILD_TESTS "Build tests" OFF)
+
+if(JESEN_BUILD_TESTS)
+    enable_testing()
+    add_executable(test_jesen tests/test_jesen.c)
+    target_link_libraries(test_jesen PRIVATE jesen)
+    add_test(NAME test_jesen COMMAND test_jesen)
+endif()
+
+# Installation
+install(TARGETS jesen
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+)
+
+install(FILES jesen.h DESTINATION include)
