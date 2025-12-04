@@ -10,8 +10,17 @@ set(JESEN_SOURCES
     cJSON/cJSON.c
 )
 
-# Create static library
-add_library(jesen STATIC ${JESEN_SOURCES})
+option(JESEN_BUILD_SHARED "Build jesen as a shared library" OFF)
+
+if(JESEN_BUILD_SHARED)
+    add_library(jesen SHARED ${JESEN_SOURCES})
+    target_compile_definitions(jesen
+        PRIVATE JESEN_DLL_EXPORTS
+        PUBLIC JESEN_DLL
+    )
+else()
+    add_library(jesen STATIC ${JESEN_SOURCES})
+endif()
 
 target_include_directories(jesen
     PUBLIC
@@ -33,6 +42,7 @@ endif()
 install(TARGETS jesen
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
 )
 
 install(FILES jesen.h DESTINATION include)
