@@ -1081,6 +1081,10 @@ jesen_err_t jesen_object_size(const jesen_node_t *object, size_t *out_size) {
 
 jesen_err_t jesen_serialize(const jesen_node_t *node, char *out_buf,
                             size_t out_buf_len) {
+  if (!node || !node->cjson || !out_buf || out_buf_len == 0) {
+    return JESEN_ERR_INVALID_ARGS;
+  }
+
   if (!cJSON_PrintPreallocated(node->cjson, out_buf, (int)out_buf_len, false)) {
     return JESEN_ERR_BUFFER_TOO_SMALL;
   }

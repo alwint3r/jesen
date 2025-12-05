@@ -36,9 +36,19 @@ cmake --install . --prefix /usr/local
 
 > **Note:** The CMake build statically links cJSON into `libjesen.a`. The cJSON headers are not installed separately—jesen's public API (`jesen.h`) is self-contained and does not expose cJSON types.
 
+### CMake Targets
+- Build-tree: link with `jesen` or the namespaced alias `jesen::jesen`.
+- Installed: `find_package(jesen CONFIG REQUIRED)` then `target_link_libraries(your_target PRIVATE jesen::jesen)`.
+
 ### Shared Library / C++ Consumers
 - To build a shared library/DLL with exported symbols, configure CMake with `-DJESEN_BUILD_SHARED=ON`. The build will set the `JESEN_DLL`/`JESEN_DLL_EXPORTS` defines so symbols are exported and C++ consumers get `dllimport` on Windows.
 - When building without CMake, define `JESEN_DLL_EXPORTS` while compiling the library and `JESEN_DLL` when consuming it so the `JESEN_API` annotations in `jesen.h` export/import symbols correctly.
+
+### Quick CI-style Check (static + shared)
+Run both static and shared builds with tests enabled:
+```sh
+./scripts/ci.sh
+```
 
 ### Manual Build
 Build and run the simple test suite:

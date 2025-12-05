@@ -24,6 +24,8 @@ else()
     add_library(jesen STATIC ${JESEN_SOURCES})
 endif()
 
+add_library(jesen::jesen ALIAS jesen)
+
 target_include_directories(jesen
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

@@ -624,7 +624,8 @@ JESEN_API jesen_err_t jesen_node_assign_to(jesen_node_t *parent,
  * @param node Source node.
  * @param[out] out_buf Destination buffer (includes terminator).
  * @param out_buf_len Size of `out_buf` in bytes.
- * @return JESEN_ERR_NONE on success or JESEN_ERR_BUFFER_TOO_SMALL if short.
+ * @return JESEN_ERR_NONE on success, JESEN_ERR_BUFFER_TOO_SMALL if short, or
+ *         JESEN_ERR_INVALID_ARGS for null inputs/zero length.
  */
 JESEN_API jesen_err_t jesen_serialize(const jesen_node_t *node, char *out_buf,
                                       size_t out_buf_len);
