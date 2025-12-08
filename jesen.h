@@ -363,6 +363,16 @@ JESEN_API jesen_err_t jesen_node_find(const jesen_node_t *node, const char *key,
                                       jesen_node_t **out);
 
 /**
+ * @brief Get an immediate child of an object by key (alias for jesen_node_find).
+ * @param node Object to search.
+ * @param key  Property name.
+ * @param[out] out Receives the existing child wrapper.
+ * @return JESEN_ERR_NONE on success or JESEN_ERR_NOT_FOUND if missing.
+ * @note This function is an alias for jesen_node_find and will be deprecated in a future release.
+ */
+JESEN_API jesen_err_t jesen_object_get_value(const jesen_node_t *node, const char* key, jesen_node_t **out);
+
+/**
  * @brief Typed getter for an object property expected to be an int32.
  * @param object Source object.
  * @param key    Property name.

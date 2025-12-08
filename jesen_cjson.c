@@ -749,6 +749,11 @@ jesen_err_t jesen_node_find(const jesen_node_t *node, const char *key,
   return JESEN_ERR_NOT_FOUND;
 }
 
+jesen_err_t jesen_object_get_value(const jesen_node_t *node, const char *key,
+                                   jesen_node_t **out) {
+  return jesen_node_find(node, key, out);
+}
+
 jesen_err_t jesen_object_get_int32(const jesen_node_t *object, const char *key,
                                    int32_t *out) {
   if (!object || !key || !out) {
